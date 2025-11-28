@@ -10,31 +10,15 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from PIL import Image
-import os
 
 st.title('Factor Returns and Selections')
 st.write('For Investors who want to invest in markets with factor tilts')
-
-# Get the directory where this script is located
-script_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Use folder names without spaces for better Git compatibility
-path_string_1 = os.path.join(script_dir, "factor_backtests") + os.sep
-path_string_2 = os.path.join(script_dir, "factor_backtests", "Low Vol") + os.sep
-path_string_3 = os.path.join(script_dir, "factor_selections") + os.sep
-# Try to read the updated_till.csv file with error handling
-try:
-    updated_till_path = os.path.join(script_dir, "factor_selections", 'updated_till.csv')
-    if os.path.exists(updated_till_path):
-        df_date = pd.read_csv(updated_till_path)
-        updated_till = df_date['Date'].loc[0]
-        st.write('Updated till' + ' ' + updated_till)
-    else:
-        st.write('Updated till: Data not available')
-except Exception as e:
-    st.error(f'Error reading update date: {str(e)}')
-    st.write('Updated till: Data not available')
-
+path_string_1="./Factor Backtests/"
+path_string_2="./Factor Backtests/Low Vol/"
+path_string_3="./Factor Selections/"
+df_date=pd.read_csv(path_string_3+'updated_till.csv')
+updated_till=df_date['Date'].loc[0]
+st.write('Updated till'+' '+updated_till)
 dir_1={'High Alpha':'alpha','Low Vol':'vol','Low Beta':'beta','Low iVol':'ivol','High Momentum':'momentum'}
 dir_2={'NSE50':'2704','NSE200':'3385','NSE500':'3386','ex Index':'0'}
 
@@ -74,37 +58,35 @@ add_selectbox_7 = st.sidebar.selectbox(
 )
 
 file_string_1=path_string_3+dir_2.get(add_selectbox_2)+add_selectbox_3+dir_1.get(add_selectbox_1)+'.csv'
-try:
-    df_factor=pd.read_csv(file_string_1)
-    #In df_factor, delete the first column
-    df_factor.drop(df_factor.columns[0], axis=1, inplace=True)
-    df_factor.drop(columns=['Factor'],inplace=True)
-    df_factor_selection=df_factor.head(int(add_selectbox_4))
-    if add_selectbox_5=='Equal Weight':
-        df_factor_selection['Quantity']=np.ceil((int(add_selectbox_6)/int(add_selectbox_4))/df_factor_selection['Close'])
-    if add_selectbox_5=='Factor Weight':
-        min_weight=2
-        max_weight=5
-        factor=(max_weight-min_weight)/int(add_selectbox_4)
-        weights=[]
-        b=max_weight
-        while b>=min_weight: 
-            weights.append(b)
-            b=b-factor
-        if len(weights)>int(add_selectbox_4):         
-            weights=weights[:-1]
-        df_factor_selection['Weight']=weights
-        df_factor_selection['Weight']=df_factor_selection['Weight']/df_factor_selection['Weight'].sum()
-        df_factor_selection['Quantity']=np.ceil(df_factor_selection['Weight']*int(add_selectbox_6)/df_factor_selection['Close'])
-        df_factor_selection.drop(columns=['Weight'],inplace=True)
-    st.write(df_factor_selection)
-except Exception as e:
-    st.error(f'Error loading factor selection data: {str(e)}')
-    st.write('Factor selection file not found. Please check if the required data files are present.')
-
-image_string=path_string_1+add_selectbox_1+os.sep+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Only.jpg'
-data_string=path_string_1+add_selectbox_1+os.sep+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Only.csv'
-index_string=path_string_1+add_selectbox_1+os.sep+add_selectbox_2+'.csv'
+df_factor=pd.read_csv(file_string_1)
+print(df_factor)
+#In df_factor, delete the first column
+df_factor.drop(df_factor.columns[0], axis=1, inplace=True)
+df_factor.drop(columns=['Factor'],inplace=True)
+#rename column 'Selection Close' to 'Close'
+df_factor_selection.rename(columns={'Selection Close':'Close'},inplace=True)
+df_factor_selection=df_factor.head(int(add_selectbox_4))
+if add_selectbox_5=='Equal Weight':
+    df_factor_selection['Quantity']=np.ceil((int(add_selectbox_6)/int(add_selectbox_4))/df_factor_selection['Close'])
+if add_selectbox_5=='Factor Weight':
+    min_weight=2
+    max_weight=5
+    factor=(max_weight-min_weight)/int(add_selectbox_4)
+    weights=[]
+    b=max_weight
+    while b>=min_weight: 
+        weights.append(b)
+        b=b-factor
+    if len(weights)>int(add_selectbox_4):         
+        weights=weights[:-1]
+    df_factor_selection['Weight']=weights
+    df_factor_selection['Weight']=df_factor_selection['Weight']/df_factor_selection['Weight'].sum()
+    df_factor_selection['Quantity']=np.ceil(df_factor_selection['Weight']*int(add_selectbox_6)/df_factor_selection['Close'])
+    df_factor_selection.drop(columns=['Weight'],inplace=True)
+st.write(df_factor_selection)
+image_string=path_string_1+add_selectbox_1+'/'+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Only.jpg'
+data_string=path_string_1+add_selectbox_1+'/'+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Only.csv'
+index_string=path_string_1+add_selectbox_1+'/'+add_selectbox_2+'.csv'
 st.header('Backtest Results')
 try:
     image=Image.open(image_string)
@@ -121,7 +103,7 @@ except:
     st.write('Backtest Data Not Available. Not enough or too much diversification for index size')
 
 if add_selectbox_7=='YES':
-    data_string_trades=path_string_1+add_selectbox_1+os.sep+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Onlydetails.csv'
+    data_string_trades=path_string_1+add_selectbox_1+'/'+add_selectbox_2+' '+add_selectbox_1+' '+add_selectbox_4+' Stocks '+add_selectbox_5+' '+add_selectbox_3+' Days Look Back '+add_selectbox_8+' Rebalancing Days Long Strategy Onlydetails.csv'
     try:
         st.header('Backtest Trade Details')
         df_data_trades=pd.read_csv(data_string_trades)
