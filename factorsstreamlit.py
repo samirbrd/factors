@@ -64,7 +64,7 @@ print(df_factor)
 df_factor.drop(df_factor.columns[0], axis=1, inplace=True)
 df_factor.drop(columns=['Factor'],inplace=True)
 #rename column 'Selection Close' to 'Close'
-df_factor_selection.rename(columns={'Selection Close':'Close'},inplace=True)
+df_factor.rename(columns={'Selection Close':'Close'},inplace=True)
 df_factor_selection=df_factor.head(int(add_selectbox_4))
 if add_selectbox_5=='Equal Weight':
     df_factor_selection['Quantity']=np.ceil((int(add_selectbox_6)/int(add_selectbox_4))/df_factor_selection['Close'])
