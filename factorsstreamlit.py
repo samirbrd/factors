@@ -13,9 +13,9 @@ from PIL import Image
 
 st.title('Factor Returns and Selections')
 st.write('For Investors who want to invest in markets with factor tilts')
-path_string_1="./Factor Backtests/"
-path_string_2="./Factor Backtests/Low Vol/"
-path_string_3="./Factor Selections/"
+path_string_1="./factor_backtests/"
+path_string_2="./factor_backtests/Low Vol/"
+path_string_3="./factor_selections/"
 df_date=pd.read_csv(path_string_3+'updated_till.csv')
 updated_till=df_date['Date'].loc[0]
 st.write('Updated till'+' '+updated_till)
